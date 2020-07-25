@@ -1,0 +1,17 @@
+FROM centos:centos7
+
+RUN \
+cp -a /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak; \
+\
+sed -i "s/#baseurl/baseurl/g" /etc/yum.repos.d/CentOS-Base.repo; \
+sed -i "s/mirrorlist=http/#mirrorlist=http/g" /etc/yum.repos.d/CentOS-Base.repo; \
+sed -i "s@http://mirror.centos.org@https://mirrors.huaweicloud.com@g" /etc/yum.repos.d/CentOS-Base.repo; \
+\
+yum clean all; \
+yum makecache;
+RUN mkdir /usr/bin/jdk; 
+ADD openjdk-14_linux-x64_bin.tar.gz /usr/bin/jdk
+ENV JAVA_HOME=/usr/bin/jdk/jdk-14
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# yum install -y java-1.8.0-openjdk

@@ -1,0 +1,44 @@
+FROM centos:centos7
+
+RUN \
+cp -a /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak; \
+\
+sed -i "s/#baseurl/baseurl/g" /etc/yum.repos.d/CentOS-Base.repo; \
+sed -i "s/mirrorlist=http/#mirrorlist=http/g" /etc/yum.repos.d/CentOS-Base.repo; \
+sed -i "s@http://mirror.centos.org@https://mirrors.huaweicloud.com@g" /etc/yum.repos.d/CentOS-Base.repo; \
+\
+yum clean all; \
+yum makecache; \
+yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make libffi-devel epel-release wget; 
+
+RUN \
+cp -a /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup; \
+mv /etc/yum.repos.d/epel-testing.repo /etc/yum.repos.d/epel-testing.repo.backup; \
+\
+sed -i "s/#baseurl/baseurl/g" /etc/yum.repos.d/epel.repo; \
+sed -i "s/metalink/#metalink/g" /etc/yum.repos.d/epel.repo; \
+sed -i "s@http://download.fedoraproject.org/pub@https://mirrors.huaweicloud.com@g" /etc/yum.repos.d/epel.repo; \
+yum update; \
+yum install -y python-pip; \
+\
+mkdir -p ~/.pip; \
+echo $'\
+[global]\n\
+index-url = https://mirrors.huaweicloud.com/repository/pypi/simple\n\
+trusted-host = mirrors.huaweicloud.com\n\
+timeout = 120\n' >> ~/.pip/pip.conf 
+
+RUN \ 
+wget https://www.python.org/ftp/python/3.7.4/Python-3.7.4.tgz; \
+tar -zxvf Python-3.7.4.tgz; \
+cd Python-3.7.4; \
+./configure prefix=/usr/local/python3; \
+make && make install; \
+ln -s /usr/local/python3/bin/python3.7 /usr/bin/python3.7; \
+ln -s /usr/local/python3/bin/pip3.7 /usr/bin/pip3.7; \
+sed -i "s@#! /usr/bin/python\$@#! /usr/bin/python2@g" /usr/bin/yum; \
+sed -i "s@#! /usr/bin/python\$@#! /usr/bin/python2@g" /usr/libexec/urlgrabber-ext-down; \
+rm -rf Python-3.7.4 Python-3.7.4.tgz
+
+RUN \
+python3.7 -m pip install apache-flink

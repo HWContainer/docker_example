@@ -1,0 +1,2 @@
+FROM swr.cn-east-2.myhuaweicloud.com/perf-test/python:3.8-yaml
+RUN pip install aiohttp cchardet aiodns
